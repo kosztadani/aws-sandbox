@@ -1,0 +1,3 @@
+locals {
+    instances = 2
+}

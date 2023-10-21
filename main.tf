@@ -81,13 +81,14 @@ resource aws_vpc_security_group_egress_rule "my-egress-rule" {
     }
 }
 
-resource aws_network_interface "my-network-interface" {
+resource aws_network_interface "my-network-interfaces" {
+    count = local.instances
     subnet_id = aws_subnet.my-subnet.id
-    private_ips = ["192.168.0.4"]
+    private_ips = [cidrhost("192.168.0.0/24", 10 + count.index)]
     security_groups = [aws_security_group.my-security-group.id]
     description = "my-network-interface"
     tags = {
-        Name = "my-network-interface"
+        Name = "my-network-interface-${count.index}"
     }
 }
 
@@ -99,25 +100,27 @@ resource aws_key_pair "my-key" {
     }
 }
 
-resource aws_eip "my-public-ip" {
+resource aws_eip "my-public-ips" {
+    count = local.instances
     domain = "vpc"
-    network_interface = aws_network_interface.my-network-interface.id
-    associate_with_private_ip = "192.168.0.4"
+    network_interface = aws_network_interface.my-network-interfaces[count.index].id
+    associate_with_private_ip = cidrhost("192.168.0.0/24", 10 + count.index)
     tags = {
-        Name = "my-public-ip"
+        Name = "my-public-ip-${count.index}"
     }
 }
 
-resource aws_instance "my-server" {
+resource aws_instance "my-servers" {
+    count = local.instances
     ami = "ami-05ee09b16a3aaa2fd" // Debian 12 (HVM)
     instance_type = "t2.nano"
     key_name = aws_key_pair.my-key.key_name
     network_interface {
         device_index = 0
-        network_interface_id = aws_network_interface.my-network-interface.id
+        network_interface_id = aws_network_interface.my-network-interfaces[count.index].id
     }
-    associate_public_ip_address = aws_eip.my-public-ip.address
+    associate_public_ip_address = aws_eip.my-public-ips[count.index].address
     tags = {
-        Name = "my-server"
+        Name = "my-server-${count.index}"
     }
 }
