@@ -138,7 +138,7 @@ resource aws_eip "my-public-ips" {
 
 resource aws_instance "my-servers" {
     count = local.instances
-    ami = "ami-05ee09b16a3aaa2fd" // Debian 12 (HVM)
+    ami = "ami-042e6fdb154c830c5" // Debian 12 (HVM)
     instance_type = "t2.nano"
     key_name = aws_key_pair.my-key.key_name
     network_interface {
