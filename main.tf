@@ -37,7 +37,7 @@ resource aws_route "my-route" {
     gateway_id = aws_internet_gateway.my-gateway.id
 }
 
-resource aws_subnet "my-subnet" {
+resource aws_subnet "my-subnet-1a" {
     vpc_id = aws_vpc.my-vpc.id
     cidr_block = "192.168.0.0/24"
     availability_zone = "eu-central-1a"
@@ -46,9 +46,35 @@ resource aws_subnet "my-subnet" {
         Name = "my-subnet"
     }
 }
+resource aws_subnet "my-subnet-1b" {
+    vpc_id = aws_vpc.my-vpc.id
+    cidr_block = "192.168.1.0/24"
+    availability_zone = "eu-central-1b"
+    depends_on = [aws_internet_gateway.my-gateway]
+    tags = {
+        Name = "my-subnet"
+    }
+}
+resource aws_subnet "my-subnet-1c" {
+    vpc_id = aws_vpc.my-vpc.id
+    cidr_block = "192.168.2.0/24"
+    availability_zone = "eu-central-1c"
+    depends_on = [aws_internet_gateway.my-gateway]
+    tags = {
+        Name = "my-subnet"
+    }
+}
 
 resource aws_route_table_association "my-route-table-association" {
-    subnet_id = aws_subnet.my-subnet.id
+    subnet_id = aws_subnet.my-subnet-1a.id
+    route_table_id = aws_route_table.my-route-table.id
+}
+resource aws_route_table_association "my-route-table-association-1b" {
+    subnet_id = aws_subnet.my-subnet-1b.id
+    route_table_id = aws_route_table.my-route-table.id
+}
+resource aws_route_table_association "my-route-table-association-1c" {
+    subnet_id = aws_subnet.my-subnet-1c.id
     route_table_id = aws_route_table.my-route-table.id
 }
 
@@ -83,7 +109,7 @@ resource aws_vpc_security_group_egress_rule "my-egress-rule" {
 
 resource aws_network_interface "my-network-interfaces" {
     count = local.instances
-    subnet_id = aws_subnet.my-subnet.id
+    subnet_id = aws_subnet.my-subnet-1a.id
     private_ips = [cidrhost("192.168.0.0/24", 10 + count.index)]
     security_groups = [aws_security_group.my-security-group.id]
     description = "my-network-interface"
