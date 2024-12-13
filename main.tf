@@ -10,6 +10,11 @@ terraform {
 provider aws {
 }
 
+terraform {
+    backend "s3" {
+    }
+}
+
 resource aws_vpc "my-vpc" {
     cidr_block = "192.168.0.0/16"
     tags = {
