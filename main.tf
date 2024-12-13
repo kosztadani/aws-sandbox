@@ -83,6 +83,10 @@ resource aws_route_table_association "my-route-table-association-1c" {
     route_table_id = aws_route_table.my-route-table.id
 }
 
+resource aws_ec2_instance_connect_endpoint "my-connection-endpoint" {
+    subnet_id = aws_subnet.my-subnet-1a.id
+}
+
 resource aws_security_group "my-security-group" {
     name = "my-security-group"
     vpc_id = aws_vpc.my-vpc.id
