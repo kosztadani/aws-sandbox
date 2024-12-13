@@ -65,7 +65,7 @@ resource aws_subnet "my-subnet-1c" {
     }
 }
 
-resource aws_route_table_association "my-route-table-association" {
+resource aws_route_table_association "my-route-table-association-1a" {
     subnet_id = aws_subnet.my-subnet-1a.id
     route_table_id = aws_route_table.my-route-table.id
 }
