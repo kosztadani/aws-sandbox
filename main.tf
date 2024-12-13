@@ -4,6 +4,10 @@ terraform {
             source = "hashicorp/aws"
             version = "~> 5.0"
         }
+        local = {
+            source = "hashicorp/local"
+            version = "~> 2.0"
+        }
     }
 }
 
@@ -127,8 +131,12 @@ resource aws_network_interface "my-network-interfaces" {
     }
 }
 
+data local_file my-public-key {
+    filename = "${path.module}/resources/ssh/my-key"
+}
+
 resource aws_key_pair "my-key" {
-    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcilddbNNCI60MPU50yy2ctMAOzXWmiC9tuhc4xdzx8JPwXcTx83QgY/qm3y0g2ulLkyMh9LUzETm7ci7SWGBB63s9/68aTDv5zpyufT+nv8ABmUhYtOfS2Ngfa1ruwvHpLgB1Y8aUtqz3likLMGDYgDwWFEr1aboGv4tNCJSqsJ9gxIiRv5VTgXBkmST6wI9Z7jE0mDpTvEKKuc4sM2umUOe+Aa++NjyquhMNlURwkbnN0KyE2wLN5PQbZBImXKAtqT8lkLRM6JHLpgBxaIgmgSMWVna1tMJVM93jVL6LF0CHdl3KNIxXGvRzBSST/nli+v8EYOifGuOBJMGi4xPD"
+    public_key = data.local_file.my-public-key.content
     key_name = "my-key"
     tags = {
         Name = "my-key"
