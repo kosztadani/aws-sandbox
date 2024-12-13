@@ -163,6 +163,7 @@ resource aws_instance "my-servers" {
         network_interface_id = aws_network_interface.my-network-interfaces[count.index].id
     }
     associate_public_ip_address = aws_eip.my-public-ips[count.index].address
+    user_data = file("${path.module}/resources/setup.sh")
     tags = {
         Name = "my-server-${count.index}"
     }
