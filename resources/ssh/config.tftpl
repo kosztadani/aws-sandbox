@@ -1,0 +1,7 @@
+%{ for instance in instances ~}
+Host ${instance.name} ${instance.id}
+    User admin
+    ProxyCommand aws ec2-instance-connect open-tunnel --instance-id ${instance.id}
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+%{ endfor ~}

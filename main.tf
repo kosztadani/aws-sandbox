@@ -255,3 +255,16 @@ resource aws_instance "my-instances" {
         Name = "my-instance-${count.index}"
     }
 }
+
+resource local_file "my-ssh-config" {
+    filename = "${path.module}/generated/ssh-config"
+    content = templatefile("${path.module}/resources/ssh/config.tftpl", {
+        instances = [
+            for instance in aws_instance.my-instances : {
+                id = instance.id
+                name = instance.tags.Name
+            }
+        ]
+    })
+    file_permission = "0600"
+}
