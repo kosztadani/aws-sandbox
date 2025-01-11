@@ -130,6 +130,34 @@ resource aws_vpc_security_group_egress_rule "my-egress-rule" {
     }
 }
 
+resource aws_default_network_acl "my-network-acl" {
+    default_network_acl_id = aws_vpc.my-vpc.default_network_acl_id
+    ingress {
+        protocol = -1
+        rule_no = 100
+        action = "allow"
+        cidr_block = "0.0.0.0/0"
+        from_port = 0
+        to_port = 0
+    }
+    egress {
+        protocol = -1
+        rule_no = 100
+        action = "allow"
+        cidr_block = "0.0.0.0/0"
+        from_port = 0
+        to_port = 0
+    }
+    subnet_ids = [
+        aws_subnet.my-subnet-1a.id,
+        aws_subnet.my-subnet-1b.id,
+        aws_subnet.my-subnet-1c.id
+    ]
+    tags = {
+        Name = "my-network-acl"
+    }
+}
+
 resource aws_network_interface "my-network-interfaces" {
     count = local.instances
     subnet_id = aws_subnet.my-subnet-1a.id
