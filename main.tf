@@ -98,6 +98,7 @@ resource aws_route_table_association "my-route-table-association-1c" {
 
 resource aws_ec2_instance_connect_endpoint "my-connection-endpoint" {
     subnet_id = aws_subnet.my-subnet-1a.id
+    preserve_client_ip = false
     tags = {
         Name = "my-connection-endpoint"
     }
