@@ -141,6 +141,19 @@ resource aws_network_interface "my-network-interfaces" {
     }
 }
 
+resource aws_vpc_endpoint "my-vpc-endpoint" {
+    vpc_id = aws_vpc.my-vpc.id
+    service_name = "com.amazonaws.eu-central-1.s3"
+    tags = {
+        Name = "my-vpc-endpoint"
+    }
+}
+
+resource aws_vpc_endpoint_route_table_association "my-vpc-endpoint-route-table-association" {
+    route_table_id = aws_route_table.my-route-table.id
+    vpc_endpoint_id = aws_vpc_endpoint.my-vpc-endpoint.id
+}
+
 data local_file my-public-key {
     filename = "${path.module}/resources/ssh/my-key"
 }
