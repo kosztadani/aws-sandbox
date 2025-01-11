@@ -50,3 +50,16 @@ With SSH, using a ProxyCommand (example):
 ssh admin@i-0a8ffd81a653cf0e6 \
     -o ProxyCommand="aws ec2-instance-connect open-tunnel --instance-id %h"
 ```
+
+An appropriate SSH configuration is generated under `generated/ssh-config`.
+You can include it from your own `~/.ssh/config`, e.g.:
+
+```text
+Include ~/src/aws-sandbox/generated/ssh-config
+```
+
+After that, you can access your instances by name, e.g.,
+
+```bash
+ssh my-instance-0
+```
