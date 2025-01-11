@@ -154,18 +154,6 @@ resource aws_vpc_endpoint_route_table_association "my-vpc-endpoint-route-table-a
     vpc_endpoint_id = aws_vpc_endpoint.my-vpc-endpoint.id
 }
 
-data local_file my-public-key {
-    filename = "${path.module}/resources/ssh/my-key"
-}
-
-resource aws_key_pair "my-key" {
-    public_key = data.local_file.my-public-key.content
-    key_name = "my-key"
-    tags = {
-        Name = "my-key"
-    }
-}
-
 resource aws_eip "my-public-ips" {
     count = local.instances
     domain = "vpc"
@@ -243,7 +231,6 @@ resource aws_instance "my-instances" {
     count = local.instances
     ami = "ami-042e6fdb154c830c5" // Debian 12 (HVM)
     instance_type = "t2.nano"
-    key_name = aws_key_pair.my-key.key_name
     network_interface {
         device_index = 0
         network_interface_id = aws_network_interface.my-network-interfaces[count.index].id
@@ -259,6 +246,7 @@ resource aws_instance "my-instances" {
 resource local_file "my-ssh-config" {
     filename = "${path.module}/generated/ssh-config"
     content = templatefile("${path.module}/resources/ssh/config.tftpl", {
+        proxy_command_script = abspath("${path.module}/scripts/aws-ssh-proxy-command.sh")
         instances = [
             for instance in aws_instance.my-instances : {
                 id = instance.id
