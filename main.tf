@@ -38,15 +38,15 @@ resource aws_internet_gateway "my-gateway" {
     }
 }
 
-resource aws_route_table "my-route-table" {
-    vpc_id = aws_vpc.my-vpc.id
+resource aws_default_route_table "my-route-table" {
+    default_route_table_id = aws_vpc.my-vpc.default_route_table_id
     tags = {
         Name = "my-route-table"
     }
 }
 
 resource aws_route "my-route" {
-    route_table_id = aws_route_table.my-route-table.id
+    route_table_id = aws_default_route_table.my-route-table.id
     destination_cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.my-gateway.id
 }
@@ -83,17 +83,17 @@ resource aws_subnet "my-subnet-1c" {
 
 resource aws_route_table_association "my-route-table-association-1a" {
     subnet_id = aws_subnet.my-subnet-1a.id
-    route_table_id = aws_route_table.my-route-table.id
+    route_table_id = aws_default_route_table.my-route-table.id
 }
 
 resource aws_route_table_association "my-route-table-association-1b" {
     subnet_id = aws_subnet.my-subnet-1b.id
-    route_table_id = aws_route_table.my-route-table.id
+    route_table_id = aws_default_route_table.my-route-table.id
 }
 
 resource aws_route_table_association "my-route-table-association-1c" {
     subnet_id = aws_subnet.my-subnet-1c.id
-    route_table_id = aws_route_table.my-route-table.id
+    route_table_id = aws_default_route_table.my-route-table.id
 }
 
 resource aws_ec2_instance_connect_endpoint "my-connection-endpoint" {
@@ -150,7 +150,7 @@ resource aws_vpc_endpoint "my-vpc-endpoint" {
 }
 
 resource aws_vpc_endpoint_route_table_association "my-vpc-endpoint-route-table-association" {
-    route_table_id = aws_route_table.my-route-table.id
+    route_table_id = aws_default_route_table.my-route-table.id
     vpc_endpoint_id = aws_vpc_endpoint.my-vpc-endpoint.id
 }
 
