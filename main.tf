@@ -12,6 +12,11 @@ terraform {
 }
 
 provider aws {
+    default_tags {
+        tags = {
+            "Terraform-project" = "aws-sandbox"
+        }
+    }
 }
 
 terraform {
