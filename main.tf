@@ -153,6 +153,69 @@ resource aws_eip "my-public-ips" {
     }
 }
 
+data aws_iam_policy_document "my-assume-role-policy-document" {
+    statement {
+        effect = "Allow"
+        principals {
+            type = "Service"
+            identifiers = ["ec2.amazonaws.com"]
+        }
+        actions = [
+            "sts:AssumeRole"
+        ]
+    }
+}
+
+resource aws_iam_role "my-role" {
+    name = "my-role"
+    assume_role_policy = data.aws_iam_policy_document.my-assume-role-policy-document.json
+    tags = {
+        Name = "my-role"
+    }
+}
+
+data aws_iam_policy_document "my-s3-policy-document" {
+    statement {
+        effect = "Allow"
+        actions = [
+            "s3:ListBucket"
+        ]
+        resources = [
+            "arn:aws:s3:::sandbox.aws.kosztadani.me"
+        ]
+    }
+    statement {
+        effect = "Allow"
+        actions = [
+            "s3:GetObject"
+        ]
+        resources = [
+            "arn:aws:s3:::sandbox.aws.kosztadani.me/*"
+        ]
+    }
+}
+
+resource aws_iam_policy "my-s3-policy" {
+    name = "my-policy"
+    policy = data.aws_iam_policy_document.my-s3-policy-document.json
+    tags = {
+        Name = "my-s3-policy"
+    }
+}
+
+resource aws_iam_role_policy_attachment "my-s3-policy-attachment" {
+    role = aws_iam_role.my-role.name
+    policy_arn = aws_iam_policy.my-s3-policy.arn
+}
+
+resource aws_iam_instance_profile "my-instance-profile" {
+    name = "my-instance-profile"
+    role = aws_iam_role.my-role.name
+    tags = {
+        Name = "my-instance-profile"
+    }
+}
+
 resource aws_instance "my-servers" {
     count = local.instances
     ami = "ami-042e6fdb154c830c5" // Debian 12 (HVM)
@@ -164,6 +227,7 @@ resource aws_instance "my-servers" {
     }
     associate_public_ip_address = aws_eip.my-public-ips[count.index].address
     user_data = file("${path.module}/resources/setup.sh")
+    iam_instance_profile = aws_iam_instance_profile.my-instance-profile.name
     tags = {
         Name = "my-server-${count.index}"
     }
