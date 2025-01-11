@@ -98,17 +98,15 @@ resource aws_ec2_instance_connect_endpoint "my-connection-endpoint" {
     }
 }
 
-resource aws_security_group "my-security-group" {
-    name = "my-security-group"
+resource aws_default_security_group "my-security-group" {
     vpc_id = aws_vpc.my-vpc.id
-    description = "my-security-group"
     tags = {
         Name = "my-security-group"
     }
 }
 
 resource aws_vpc_security_group_ingress_rule "my-ingress-rule" {
-    security_group_id = aws_security_group.my-security-group.id
+    security_group_id = aws_default_security_group.my-security-group.id
     cidr_ipv4 = "0.0.0.0/0"
     ip_protocol = "-1"
     description = "my-ingress-rule"
@@ -118,7 +116,7 @@ resource aws_vpc_security_group_ingress_rule "my-ingress-rule" {
 }
 
 resource aws_vpc_security_group_egress_rule "my-egress-rule" {
-    security_group_id = aws_security_group.my-security-group.id
+    security_group_id = aws_default_security_group.my-security-group.id
     cidr_ipv4 = "0.0.0.0/0"
     ip_protocol = "-1"
     description = "my-egress-rule"
@@ -131,7 +129,7 @@ resource aws_network_interface "my-network-interfaces" {
     count = local.instances
     subnet_id = aws_subnet.my-subnet-1a.id
     private_ips = [cidrhost("192.168.0.0/24", 10 + count.index)]
-    security_groups = [aws_security_group.my-security-group.id]
+    security_groups = [aws_default_security_group.my-security-group.id]
     description = "my-network-interface"
     tags = {
         Name = "my-network-interface-${count.index}"
