@@ -61,38 +61,8 @@ resource aws_subnet "my-subnet-1a" {
     }
 }
 
-resource aws_subnet "my-subnet-1b" {
-    vpc_id = aws_vpc.my-vpc.id
-    cidr_block = "192.168.1.0/24"
-    availability_zone = "eu-central-1b"
-    depends_on = [aws_internet_gateway.my-gateway]
-    tags = {
-        Name = "my-subnet-1b"
-    }
-}
-
-resource aws_subnet "my-subnet-1c" {
-    vpc_id = aws_vpc.my-vpc.id
-    cidr_block = "192.168.2.0/24"
-    availability_zone = "eu-central-1c"
-    depends_on = [aws_internet_gateway.my-gateway]
-    tags = {
-        Name = "my-subnet-1c"
-    }
-}
-
 resource aws_route_table_association "my-route-table-association-1a" {
     subnet_id = aws_subnet.my-subnet-1a.id
-    route_table_id = aws_default_route_table.my-route-table.id
-}
-
-resource aws_route_table_association "my-route-table-association-1b" {
-    subnet_id = aws_subnet.my-subnet-1b.id
-    route_table_id = aws_default_route_table.my-route-table.id
-}
-
-resource aws_route_table_association "my-route-table-association-1c" {
-    subnet_id = aws_subnet.my-subnet-1c.id
     route_table_id = aws_default_route_table.my-route-table.id
 }
 
@@ -151,8 +121,6 @@ resource aws_default_network_acl "my-network-acl" {
     }
     subnet_ids = [
         aws_subnet.my-subnet-1a.id,
-        aws_subnet.my-subnet-1b.id,
-        aws_subnet.my-subnet-1c.id
     ]
     tags = {
         Name = "my-network-acl"
