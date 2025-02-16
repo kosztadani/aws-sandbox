@@ -233,6 +233,26 @@ data aws_iam_policy_document "my-s3-policy-document" {
             "arn:aws:s3:::sandbox.aws.kosztadani.me/*"
         ]
     }
+    # The following bucket is public, but uses "requester pays", so access
+    # must be granted explicitly if not using the same AWS account.
+    statement {
+        effect = "Allow"
+        actions = [
+            "s3:ListBucket"
+        ]
+        resources = [
+            "arn:aws:s3:::requester-pays.public.s3.aws.kosztadani.me"
+        ]
+    }
+    statement {
+        effect = "Allow"
+        actions = [
+            "s3:GetObject"
+        ]
+        resources = [
+            "arn:aws:s3:::requester-pays.public.s3.aws.kosztadani.me/*"
+        ]
+    }
 }
 
 resource aws_iam_policy "my-s3-policy" {
