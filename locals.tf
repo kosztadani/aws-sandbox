@@ -1,3 +1,3 @@
 locals {
-    instances = 2
+    instances = var.run ? var.instances : 0
 }

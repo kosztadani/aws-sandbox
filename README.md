@@ -19,6 +19,32 @@ Feel free to check and edit (e.g., to change `aws_region`) before running:
 ./init.sh
 ```
 
+## Creating instances
+
+To create an environment with 1 instance:
+
+```bash
+terraform apply -auto-approve
+```
+
+To adjust the number of instances:
+
+```bash
+terraform apply -var instances=2 -auto-approve
+```
+
+To destroy the instances, but not the rest of the resources:
+
+```bash
+terraform apply -var run=false -auto-approve
+```
+
+To destroy all resources:
+
+```bash
+terraform destroy -var run=false -auto-approve
+```
+
 ## EC2 instance connect
 
 You can use EC2 Instance Connect to log in to your instances.
