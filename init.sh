@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -Eeuo pipefail
 
@@ -55,8 +55,7 @@ function create_bucket() {
     printf "s3_bucket = \"%s\"\n" "${aws_s3_bucket}" >"${terraform_vars_file}"
 }
 
-
-initialize_terraform() {
+function initialize_terraform() {
     terraform init \
         -backend-config="region=${aws_region}" \
         -backend-config="bucket=${aws_s3_bucket}" \
