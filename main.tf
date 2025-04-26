@@ -31,43 +31,88 @@ resource aws_vpc "my-vpc" {
     }
 }
 
-resource aws_internet_gateway "my-gateway" {
+resource aws_internet_gateway "my-internet-gateway" {
     vpc_id = aws_vpc.my-vpc.id
     tags = {
-        Name = "my-gateway"
+        Name = "my-internet-gateway"
     }
 }
 
-resource aws_default_route_table "my-route-table" {
+resource aws_default_route_table "my-default-route-table" {
     default_route_table_id = aws_vpc.my-vpc.default_route_table_id
     tags = {
-        Name = "my-route-table"
+        Name = "my-default-route-table"
     }
 }
 
-resource aws_route "my-route" {
-    route_table_id = aws_default_route_table.my-route-table.id
+resource aws_route "my-default-route" {
+    route_table_id = aws_default_route_table.my-default-route-table.id
     destination_cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.my-gateway.id
+    nat_gateway_id = local.nat_gateways == 1 ? aws_nat_gateway.my-nat-gateway[0].id : null
+    gateway_id = local.nat_gateways == 0 ? aws_internet_gateway.my-internet-gateway.id : null
 }
 
-resource aws_subnet "my-subnet-1a" {
+resource aws_subnet "my-private-subnet" {
     vpc_id = aws_vpc.my-vpc.id
     cidr_block = "192.168.0.0/24"
     availability_zone = "eu-central-1a"
-    depends_on = [aws_internet_gateway.my-gateway]
     tags = {
-        Name = "my-subnet-1a"
+        Name = "my-private-subnet"
     }
 }
 
-resource aws_route_table_association "my-route-table-association-1a" {
-    subnet_id = aws_subnet.my-subnet-1a.id
-    route_table_id = aws_default_route_table.my-route-table.id
+resource aws_subnet "my-public-subnet" {
+    vpc_id = aws_vpc.my-vpc.id
+    cidr_block = "192.168.1.0/24"
+    availability_zone = "eu-central-1a"
+    tags = {
+        Name = "my-public-subnet"
+    }
+}
+
+resource aws_route_table "my-public-route-table" {
+    vpc_id = aws_vpc.my-vpc.id
+    tags = {
+        Name = "my-public-route-table"
+    }
+}
+
+resource aws_route "my-public-route" {
+    route_table_id = aws_route_table.my-public-route-table.id
+    destination_cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.my-internet-gateway.id
+}
+
+resource aws_eip "my-nat-public-ip" {
+    count = local.nat_gateways
+    domain = "vpc"
+    associate_with_private_ip = cidrhost("192.168.0.0/24", 5 + count.index)
+    tags = {
+        Name = "my-nat-public-ip"
+    }
+}
+
+resource aws_nat_gateway "my-nat-gateway" {
+    count = local.nat_gateways
+    subnet_id = aws_subnet.my-public-subnet.id
+    allocation_id = aws_eip.my-nat-public-ip[count.index].id
+    tags = {
+        Name = "my-nat-gateway"
+    }
+}
+
+resource aws_route_table_association "my-default-route-table-association" {
+    subnet_id = aws_subnet.my-private-subnet.id
+    route_table_id = aws_default_route_table.my-default-route-table.id
+}
+
+resource aws_route_table_association "my-public-route-table-association" {
+    subnet_id = aws_subnet.my-public-subnet.id
+    route_table_id = aws_route_table.my-public-route-table.id
 }
 
 resource aws_ec2_instance_connect_endpoint "my-connection-endpoint" {
-    subnet_id = aws_subnet.my-subnet-1a.id
+    subnet_id = aws_subnet.my-public-subnet.id
     preserve_client_ip = false
     tags = {
         Name = "my-connection-endpoint"
@@ -120,7 +165,8 @@ resource aws_default_network_acl "my-network-acl" {
         to_port = 0
     }
     subnet_ids = [
-        aws_subnet.my-subnet-1a.id,
+        aws_subnet.my-private-subnet.id,
+        aws_subnet.my-public-subnet.id,
     ]
     tags = {
         Name = "my-network-acl"
@@ -129,7 +175,7 @@ resource aws_default_network_acl "my-network-acl" {
 
 resource aws_network_interface "my-network-interfaces" {
     count = local.instances
-    subnet_id = aws_subnet.my-subnet-1a.id
+    subnet_id = aws_subnet.my-private-subnet.id
     private_ips = [cidrhost("192.168.0.0/24", 10 + count.index)]
     security_groups = [aws_default_security_group.my-security-group.id]
     description = "my-network-interface"
@@ -147,12 +193,12 @@ resource aws_vpc_endpoint "my-vpc-endpoint" {
 }
 
 resource aws_vpc_endpoint_route_table_association "my-vpc-endpoint-route-table-association" {
-    route_table_id = aws_default_route_table.my-route-table.id
+    route_table_id = aws_default_route_table.my-default-route-table.id
     vpc_endpoint_id = aws_vpc_endpoint.my-vpc-endpoint.id
 }
 
 resource aws_eip "my-public-ips" {
-    count = local.instances
+    count = local.public_ips
     domain = "vpc"
     network_interface = aws_network_interface.my-network-interfaces[count.index].id
     associate_with_private_ip = cidrhost("192.168.0.0/24", 10 + count.index)
@@ -252,7 +298,7 @@ resource aws_instance "my-instances" {
         device_index = 0
         network_interface_id = aws_network_interface.my-network-interfaces[count.index].id
     }
-    associate_public_ip_address = aws_eip.my-public-ips[count.index].address
+    associate_public_ip_address = local.public_ips == 0 ? null : aws_eip.my-public-ips[count.index].address
     user_data = file("${path.module}/resources/setup.sh")
     iam_instance_profile = aws_iam_instance_profile.my-instance-profile.name
     tags = {
