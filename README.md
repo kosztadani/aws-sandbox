@@ -21,35 +21,10 @@ Feel free to check and edit (e.g., to change `aws_region`) before running:
 
 ## EC2 instance connect
 
-### Build ec2-instance-connect package
+You can use EC2 Instance Connect to log in to your instances.
 
-To build a Debian package of ec2-instance-connect:
-
-1. Start a Debian instance
-2. Install `unzip` and `devscripts`:
-   ```bash
-   sudo apt-get update
-   sudo apt-get install -y unzip devscripts
-   ```
-3. Download a snapshot of the `aws/ec2-instance-connect-config` repository.
-   ```bash
-   wget https://github.com/aws/aws-ec2-instance-connect-config/archive/refs/heads/master.zip
-   ```
-4. Extract the sources and build the package
-   ```bash
-   unzip master
-   cd aws-ec2-instance-connect-config-master
-   make deb
-   ```
-5. Copy the created `.deb` package from the instance.
-
-### Install package on an instance
-
-To install the package on an instance (example):
-
-```
-sudo dpkg -i ec2-instance-connect_1.1.19_all.deb
-```
+This works because the instances download and install a setup package from a
+public S3 bucket. (The bucket is hard-coded in the initialization script.)
 
 ### Connect to an instance
 
@@ -79,4 +54,33 @@ After that, you can access your instances by name, e.g.,
 
 ```bash
 ssh my-instance-0
+```
+
+### Build ec2-instance-connect package
+
+If you do not want to use the setup package from the public S3 bucket, you
+can build it with the following steps:
+
+1. Start a Debian instance
+2. Install `unzip` and `devscripts`:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y unzip devscripts
+   ```
+3. Download a snapshot of the `aws/ec2-instance-connect-config` repository.
+   ```bash
+   wget https://github.com/aws/aws-ec2-instance-connect-config/archive/refs/heads/master.zip
+   ```
+4. Extract the sources and build the package
+   ```bash
+   unzip master
+   cd aws-ec2-instance-connect-config-master
+   make deb
+   ```
+5. Copy the created `.deb` package from the instance.
+
+Then, to install the package on an instance (example):
+
+```
+sudo dpkg -i ec2-instance-connect_1.1.19_all.deb
 ```
