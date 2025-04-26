@@ -189,7 +189,7 @@ data aws_iam_policy_document "my-s3-policy-document" {
             "s3:ListBucket"
         ]
         resources = [
-            "arn:aws:s3:::sandbox.aws.kosztadani.me"
+            "arn:aws:s3:::${var.s3_bucket}"
         ]
     }
     statement {
@@ -198,7 +198,7 @@ data aws_iam_policy_document "my-s3-policy-document" {
             "s3:GetObject"
         ]
         resources = [
-            "arn:aws:s3:::sandbox.aws.kosztadani.me/*"
+            "arn:aws:s3:::${var.s3_bucket}/*"
         ]
     }
     # The following bucket is public, but uses "requester pays", so access

@@ -2,6 +2,23 @@
 
 This is a sandbox repository I use for trying stuff out on AWS with terraform.
 
+## Initialization
+
+Prerequisites:
+
+- AWS CLI is installed.
+- AWS CLI is configured such that `aws sso login` will succeed.
+    - You can set the `AWS_PROFILE` environment variable if you don't want to
+      use the default profile.
+- Terraform is installed.
+- You have a working `uuidgen` command.
+
+Feel free to check and edit (e.g., to change `aws_region`) before running:
+
+```bash
+./init.sh
+```
+
 ## EC2 instance connect
 
 ### Build ec2-instance-connect package
