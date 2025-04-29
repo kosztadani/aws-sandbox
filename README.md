@@ -42,7 +42,7 @@ terraform apply -var run=false -auto-approve
 To destroy all resources:
 
 ```bash
-terraform destroy -var run=false -auto-approve
+terraform destroy -auto-approve
 ```
 
 ## EC2 instance connect
